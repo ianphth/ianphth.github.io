@@ -30,7 +30,7 @@
 					<header class="align-center">
 						<h2>Introduction to Interactive Music</h2>
 						<p>We will take a walkthrough of concept, example and implementation experience. </p>
-						<p>Outlines: <a href="#whatisim">What is Interactive Music?</a> , <a href="#howitworks"> How IM works?</a>, <a href="#examples"> Some game examples</a>, <a href="#implementation"> Implementation in Unreal</a>, <a href="#conclusion"> Conclusion</a> </p>
+						<p>Outlines: <a href="#whatisim">What is Interactive Music?</a> , <a href="#howitworks"> How IM works?</a>, <a href="#examples"> Some examples</a>, <a href="#implementation"> Implementation in Unreal</a>, <a href="#conclusion"> Conclusion</a> </p>
 					</header>
 
 					<hr class="major" />
@@ -46,24 +46,131 @@
 						
 					<h3 id="howitworks">How IM works?</h3>
 						<div class="box">
-							<p></p>
+							<p>Let's talk about sound first.</p>
+							<p> Imagine another situation, a virtual world is becoming a hell, where flames throw everywhere.
+							And we compose some music or sound to satisfy the experience of despair and fear.
+							But it's a wide open world. Explosions, relative hot area, indoor environment...and so on.
+							Based on different environments, if we want to make the experience more immersive, the auditory things should have some change.
+							</p>
+							<p> Let's see the other examples in <I>No Man's Sky</I>. The left is about <b>indoor environmental change</b>, and the right is about <b>raining on glasses</b>.
+							Remember to turn up the volume.</p>
+							<iframe src='https://gifs.com/embed/the-sound-of-no-man-s-sky-wmpnGX' frameborder='0' scrolling='no' width='480px' height='270px' style='-webkit-backface-visibility: hidden;-webkit-transform: scale(1);' ></iframe>
+							<iframe src='https://gifs.com/embed/the-sound-of-no-man-s-sky-raining-on-glass-4RxW1J' frameborder='0' scrolling='no' width='480px' height='270px' style='-webkit-backface-visibility: hidden;-webkit-transform: scale(1);' ></iframe>
+							
+							<p> And music is some thing more complicated.</p>
+							<p>Think of one example, a concert, which every instrument has their own role in the music. 
+							Like trumpets, they emerge in high tempo as the emotion of the music goes up, 
+							and violin slowly plays solo as the music returns to calm state. 
+							We might have preference over some part of music, which reflect our mood. 
+							But the composition of the music is fixed. And that's where IM comes in, to serve as a diversifying role.
+							</p>
+							<p>In this case, we've got seven common approaches, from simple to complicated:
+							</p>
+							<ul>
+								<li>Track transition via cross-fade</li>
+								<li>Ducking (when certain sound has <b>top priority over current sound</b>, its fading is called ducking)</li>
+								<li>DSP effect</li>
+								<li>Pitch shift</li>
+								<li>Tempo shift</li>
+								<li>Layering
+								(Known as <b>vertical transition</b>)
+								</li>
+								<li>Block looping
+								(Known as <b>horitonzal transition</b>)
+								</li>
+							</ul>
+							<p>And there's some timing to put these changes smoothly,
+							we called it <b>Quantitized shift</b>:
+							</p>
+							<ul>
+								<li>Immediate</li>
+								<li>Grid (self-defined interval)</li>
+								<li>Beat</li>
+								<li>Bar</li>
+								<li>Cue (when the current track finished playing)</li>
+							</ul>
+							<p>These are the basic elements of IM.</p>
 						</div>
 						
-					<h3 id="examples">Some game examples</h3>
+					<h3 id="examples">Some examples</h3>
 						<div class="box">
-							<p>Let's give a listen to IM in <b> Portal 2 </b>. It was not the earliest application, but one the most effective example during the period. </p>
+							<p>Let's give a listen to IM in <I><b> Portal 2 </b></I>. 
+							It was not the earliest application, but one the most effective example during the period. 							
+							</p>
 							<iframe width="560" height="315" src="https://www.youtube.com/embed/ursIj59J6RU" frameborder="0" allowfullscreen></iframe>
+							<p>As you can see, when the player movement is dynamically changing, here goes the <b> variation music based on background music</b>.
+							Most of the IM approaches are called <b>Musical effect</b>. That is to synchronize sound effect with music.
+							</p>
+							<p>And next example is <I><b>Nier:Automata</I></b>, see it from 11:30 and 14:20:
+							</p>
+							<iframe width="560" height="315" src="https://www.youtube.com/embed/q5e1Kwo8dgI?start=690" frameborder="0" allowfullscreen></iframe>							
+							<p><I><b>Nier:Automata</I></b> has the most beautiful music in recent years.
+							The technique here is what we called "<b>layering</b>" we mentioned above.
+							Tracks continuously replace each other when states change.
+							Also, "<b>Ducking</b>" is used here. When some high priority sound emerge(like serif in the video), all other sounds fade.
+							It's pretty simple within audio plugins like <I>Wwise</I> or <I>CriWare</I>.
+							So the most important thing for this case is not to ruin the beauty of the song.
+							</p>
 						</div>
 						
 					<h3 id="implementation">Implementation in Unreal</h3>
 						<div class="box">
-							<p>Take a look at a simple example. This is a project I first tried to integrate Wwise plugin with UE4.</p>
+							<p>Take a look at a simple example of <b>Layering</b>. 
+							This is a project I first tried to integrate Wwise plugin with UE4.
+							Thanks to <I>Nier:Automata</I>'s epic music, it's easy to emphasize the concept.
+							</p>
 							<iframe width="560" height="315" src="https://www.youtube.com/embed/n2ySmR_uJoA" frameborder="0" allowfullscreen></iframe>
+							<p>There are some features you might not notice in this demonstration.
+							</p>
+							<ul>
+								<li>The change in tracks(instrument) is what we called "Vertical transition".</li>
+								<li>Transitions in cross-fade fashion occur in next bar.</li>
+								<li>Low-pass filter is enabled in an instant.</li>
+								<li>There are some tracks without looping(about the first 8 seconds in the demo), 
+								which are not supposed to be transitioned. 
+								So we have to make sure that transitions would occur after certain duration.
+								</li>
+							</ul>
+							<p>And here's a primitive method to do layering based on Unreal's sound system.
+							If Wwise can't fulfill the need (which is of very few cases I think), 
+							or you want to have a rapid prototype, try this:
+							</p>
+							<img src="../images/UE4_IM_1.JPG" width='540px' height='270px' />
+							<ul>
+								<li>1. Create a sound cue.</li>
+								<li>2. Set up tracks you're hoping to make transition.</li>
+								<li>3. Connect a <b>continuous modulator</b> after your every player node.</li>
+								<li>4. Set up <b>parameter name</b> in every continuous modulator node.
+								This action enables us to use blueprints to control the transition.
+								</li>
+								<li>5. Set up <b>max input</b> to at least value of 1024.
+								It prevents tracks from disassembling with each other 
+								and plays tracks in low volume, which players can't hear. 
+								(Because when volume is set to zero, Unreal Engine would consider the track as stopped,
+								means the playing position would be set to 0.)
+								</li>
+								<li>6. Connect a mixer to output.</li>
+								<img src="../images/UE4_IM_2.JPG" width='540px' height='270px' />
+								<li>7. Set up a blueprint to make transition. 
+								My interface design would give a map structure(track name as key and volume float as value)
+								to the manager, and you also can set some delay nodes to do the cross-fade.
+								So it's basicly an event for local call.
+								</li>
+								<li>8. Set up triggers for activating the transition!</li>
+							</ul>
+							<p> I list a few here. There's much more approaches to be found. 
+							If there's more things I've learned, I will do my best to share.
+							</p>
 						</div>
 						
 					<h3 id="conclusion">Conclusion</h3>
 						<div class="box">
-							<p></p>
+							<p>The application of IM is pretty wide. 
+							By knowing the goal of interaction, the design should always support users to get to the goal.
+							In cases of games, the definition of goal is not very clear, because the goal is to make player happy.
+							So it comes to emotion, then the music.
+							Hope everyone can design a new sensation for IM.
+							Making games more interesting should always provide developers like us more fun, isn't it?</p>
 						</div>	
 						
 				</div>
